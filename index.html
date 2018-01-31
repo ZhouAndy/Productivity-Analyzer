@@ -1,0 +1,258 @@
+<html>
+    <head>
+        <meta charset="utf-8">        
+        <title> Productivity Analyzer</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script>
+            	$(document).ready(function(){
+		var slider = document.getElementById("myRange");
+		var output = document.getElementById("score");
+		output.innerHTML = slider.value; // Display the default slider value
+
+		// Update the current slider value (each time you drag the slider handle)
+		
+		slider.oninput = function() {
+		output.innerHTML = this.value;
+		var val = this.value;
+		}
+		// Note: in current state, both modals will open upon page load, need to use if statements to conditionally open them.
+		$("#scoreModal").modal('show');
+        
+        $("#btnclose").on("click", function() {
+		$("#scoreModal").modal('hide');
+		var value = document.getElementById("myRange").value;
+		 if(value < 5){
+		    $("#responseModal").modal('show');
+         }
+         })
+   
+		$('#databutton').click(function () {
+      if($(this).hasClass("panelisopen")){
+          $(this).removeClass("panelisopen");
+      } else {
+          var href = this.hash;
+          var depId = href.replace("#collapse",""); 
+
+          $(this).addClass("panelisopen");
+          //ADD CODE TO PARSE DATA HERE.
+        }
+        });
+	}); 
+        </script>
+    </head>
+    
+    <body>
+    <div class="container-fluid">
+  <div class="jumbotron">
+    <h1>Productivity Analyzer</h1> 
+    <p>Measures your productivity every hour and provides an analysis of your data.</p> 
+  </div>
+        <div class="row">
+            <div class="col-md-12">
+            <canvas id="canvas" width="200" height="200" style="background-color:white"></canvas>
+            <script>
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            var radius = canvas.height / 2;
+            ctx.translate(radius, radius);
+            radius = radius * 0.90
+            setInterval(drawClock, 1000);
+            
+            function drawClock() {
+              drawFace(ctx, radius);
+              drawNumbers(ctx, radius);
+              drawTime(ctx, radius);
+            }
+            
+            function drawFace(ctx, radius) {
+              var grad;
+              ctx.beginPath();
+              ctx.arc(0, 0, radius, 0, 2*Math.PI);
+              ctx.fillStyle = 'white';
+              ctx.fill();
+              grad = ctx.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
+              grad.addColorStop(1, '#333');
+              ctx.strokeStyle = grad;
+              ctx.lineWidth = radius*0.04;
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.arc(0, 0, radius*0.1, 0, 2*Math.PI);
+              ctx.fill();
+            }
+            
+            function drawNumbers(ctx, radius) {
+              var ang;
+              var num;
+              ctx.font = radius*0.15 + "px Courier New";
+              ctx.textBaseline="middle";
+              ctx.textAlign="center";
+              for(num = 1; num < 13; num++){
+                ang = num * Math.PI / 6;
+                ctx.rotate(ang);
+                ctx.translate(0, -radius*0.85);
+                ctx.rotate(-ang);
+                ctx.fillText(num.toString(), 0, 0);
+                ctx.rotate(ang);
+                ctx.translate(0, radius*0.85);
+                ctx.rotate(-ang);
+              }
+            }
+            
+            function drawTime(ctx, radius){
+                var now = new Date();
+                var hour = now.getHours();
+                var minute = now.getMinutes();
+                var second = now.getSeconds();
+                //hour
+                hour=hour%12;
+                hour=(hour*Math.PI/6)+
+                (minute*Math.PI/(6*60))+
+                (second*Math.PI/(360*60));
+                drawHand(ctx, hour, radius*0.5, radius*0.07);
+                //minute
+                minute=(minute*Math.PI/30)+(second*Math.PI/(30*60));
+                drawHand(ctx, minute, radius*0.8, radius*0.07);
+                // second
+                second=(second*Math.PI/30);
+                drawHand(ctx, second, radius*0.9, radius*0.02);
+            }
+            
+            function drawHand(ctx, pos, length, width) {
+                ctx.beginPath();
+                ctx.lineWidth = width;
+                ctx.lineCap = "round";
+                ctx.moveTo(0,0);
+                ctx.rotate(pos);
+                ctx.lineTo(0, -length);
+                ctx.stroke();
+                ctx.rotate(-pos);
+            }
+            </script>
+            <script>
+function startTimer(duration, display) {
+    var timer = duration;
+    setInterval(function () {
+    	var hours = parseInt(timer / 3600);
+        var minutes = parseInt((timer % 3600) / 60);
+        var seconds = parseInt(timer % 60);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.innerHTML = hours + ":" + minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            timer = duration;
+        }
+    }, 1000);
+}
+
+window.onload = function () {
+    var fiveMinutes = 3600 * 1,
+        display = document.getElementById('demo');
+    startTimer(fiveMinutes, display);
+};
+
+
+</script>
+
+
+
+<script>
+function showScore(str) {
+    if (str == "") {
+        document.getElementById("txtHint").innerHTML = "";
+        return;
+    } else { 
+        if (window.XMLHttpRequest) {
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            // code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("txtHint").innerHTML = this.responseText;
+            }
+        };
+        xmlhttp.open("GET","testOutput.php?q="+str,true);
+        xmlhttp.send();
+    }
+}
+
+</script>
+
+        <span id="demo"></span>
+            </div>
+        </div>
+        <div class="text-center">
+            <button class="btn" id="databutton" data-toggle ="collapse" type="button" href="#collapse">Results</button>
+        </div>
+		
+        <div id="collapse" class="panel-collapse collapse">
+        <div class="panel-body">
+		<form>
+			<select name="scores" onchange="showScore(this.value)">
+				<option value="">Select a report:</option>
+				<option value="0">Daily</option>
+				<option value="1">Monthly</option>
+				<option value="2">Yearly</option>
+			</select>
+		</form>
+		<div id="txtHint"></div>
+              <div class="row"><p></p></div>
+        </div>
+    </div>
+
+    </div>
+    
+    
+    
+<!--- Prompts --->    
+<div id="scoreModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Productivity Score</h4>
+				<br />
+				<p>Please select a number that represents how productive you are currently</p>
+			</div>
+			<div class="modal-body">
+			    <form action="testInsert.php" target="blank" method="get" onsubmit = "insert(this.value)">
+					<input type="range" min="1" max="10" value="5" class="slider" id="myRange" name="score">
+					<p id="score"></p>
+				
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" id="btnclose">Submit</button>
+				</div>
+				<p id="txtHint"></p>
+				</form>
+			</div>
+		</div>
+    </div>
+</div>
+<div id="responseModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Reasons For Low Productivity</h4>
+				<br />
+				<p>State the reason why you currently have low productivity</p>
+			</div>
+			<div class="modal-body">
+				<input type="text" class="form-control" placeholder="Response here">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Submit</button>  
+			</div>
+		</div>
+	</div>		
+</div>	
+    </body>
+
+</html>
